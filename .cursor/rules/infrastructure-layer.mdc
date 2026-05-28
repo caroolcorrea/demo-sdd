@@ -1,0 +1,51 @@
+---
+description: Regras da camada Infrastructure — adapters MongoDB, HTTP repositories, containers DI e entrypoint HTTP.
+globs: "**/infrastructure/**/*.py"
+alwaysApply: false
+---
+
+# Camada Infrastructure
+
+## Estrutura
+
+```
+src/infrastructure/
+├── containers/
+│   └── containers.py              # ApplicationContainer (DI)
+├── entrypoint/http/
+│   ├── routes/                    # APIRouter por domínio
+│   └── middleware/                # Middlewares HTTP
+└── persistence/
+    └── repositories/              # Implementações MongoDB
+```
+
+## Container DI
+
+```python
+class RepositoryContainer(containers.DeclarativeContainer):
+    mongodb_client = providers.Singleton(MongoDBClient, url=settings.MONGODB_URL)
+    example_repository = providers.Singleton(
+        MongoDBExampleRepository,
+        db=mongodb_client.provided.db,
+    )
+
+class UseCaseContainer(containers.DeclarativeContainer):
+    repository = providers.DependenciesContainer()
+    create_example_use_case = providers.Singleton(
+        CreateExampleUseCase,
+        repository=repository.example_repository,
+    )
+
+class ApplicationContainer(containers.DeclarativeContainer):
+    repository = providers.Container(RepositoryContainer)
+    use_case = providers.Container(UseCaseContainer, repository=repository)
+
+container = ApplicationContainer()
+```
+
+## Regras
+
+- Infrastructure NUNCA contém regra de negócio.
+- Infrastructure depende de Domain e Application — nunca o contrário.
+- Mapear exceções de infra (pymongo, httpx) para `ApplicationException` aqui, nunca nos use cases.
+- Cada router registrado no container antes de ser incluído no `app`.

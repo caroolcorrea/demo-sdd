@@ -1,0 +1,63 @@
+---
+description: Regras da camada Application — use cases com execute() async, DTOs, mappers e exceções de negócio.
+globs: "**/application/**/*.py"
+alwaysApply: false
+---
+
+# Camada Application
+
+```
+src/application/
+├── use_cases/<dominio>/   # Um arquivo por use case
+├── dto/                   # DTOs de request/response (Pydantic)
+├── mappers/               # Funções de transformação de dados
+└── exceptions.py          # Exceções de negócio
+```
+
+## Use Cases
+
+```python
+import logging
+from typing import Optional
+from pydantic import BaseModel
+
+logger = logging.getLogger(__name__)
+
+
+class CreateExampleInput(BaseModel):
+    name: str
+    description: Optional[str] = None
+
+
+class CreateExampleOutput(BaseModel):
+    id: str
+    name: str
+    message: str
+
+
+class CreateExampleUseCase:
+    def __init__(self, repository: IExampleRepository):
+        self.repository = repository
+
+    async def execute(self, input_data: CreateExampleInput) -> CreateExampleOutput:
+        logger.info("[CREATE_EXAMPLE] name=%s", input_data.name)
+        try:
+            entity = ExampleEntity(id=None, name=input_data.name, description=input_data.description)
+            saved_id = await self.repository.save(entity)
+            return CreateExampleOutput(id=saved_id, name=input_data.name, message="Criado com sucesso")
+        except ApplicationException:
+            raise
+        except Exception:
+            logger.error("[CREATE_EXAMPLE] Erro inesperado", exc_info=True)
+            raise
+```
+
+## Regras
+
+- Um use case = uma operação de negócio.
+- `execute()` DEVE ser `async`.
+- Input/Output como Pydantic `BaseModel`.
+- Injetar dependências via construtor com interfaces do domain.
+- NUNCA acessar DB, HTTP client ou serviços externos diretamente.
+- Lançar subtipos de `ApplicationException` para erros de negócio.
+- Logging estruturado com prefixo `[NOME_USE_CASE]`.

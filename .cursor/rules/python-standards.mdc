@@ -1,0 +1,55 @@
+---
+description: Padrões de código Python — type hints obrigatórios, async/await, convenções de nomenclatura e formatação.
+globs: "**/*.py"
+alwaysApply: false
+---
+
+# Padrões Python
+
+## Type Hints
+
+- Todas as funções e métodos DEVEM ter type hints nos parâmetros e retorno.
+- Use `Optional[T]` para valores anuláveis.
+- Use `List[T]`, `Dict[K, V]` do módulo `typing`.
+- Evite `Any` a menos que estritamente necessário.
+
+```python
+# Correto
+async def find_by_id(self, entity_id: str) -> Optional[ExampleEntity]:
+
+# Incorreto
+async def find_by_id(self, entity_id):
+```
+
+## Async/Await
+
+- Todas as operações de I/O (DB, HTTP, arquivo) DEVEM usar `async/await`.
+- Use `AsyncMock` nos testes para métodos async.
+- Operações do Motor (MongoDB) são sempre async.
+
+## Convenções de nomenclatura
+
+- Funções/variáveis: `snake_case`
+- Classes: `PascalCase`
+- Constantes: `UPPER_SNAKE_CASE`
+- Membros privados: `_prefixado`
+- Arquivos de módulo: `snake_case.py`
+
+## Formatação
+
+- Tamanho da linha: 88 caracteres (ruff/black)
+- Ordem de imports: stdlib, terceiros, locais (isort profile=black)
+- Formatador: `ruff format`
+- Linter: `ruff check`
+
+## Logging
+
+- Use `logging.getLogger(__name__)` por módulo.
+- Use mensagens de log estruturadas com contexto: `logger.info(f"[CONTEXTO] mensagem")`
+- Níveis: ERROR para falhas, WARNING para negado/ignorado, INFO para sucesso.
+
+## Imports
+
+- Agrupe: stdlib, terceiros, locais (separados por linhas em branco).
+- Use imports absolutos a partir de `src`: `from src.domain.entities.example import ExampleEntity`.
+- Evite imports circulares.

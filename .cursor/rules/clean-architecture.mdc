@@ -1,0 +1,86 @@
+---
+description: Regras de Clean Architecture — direção de dependências, limites entre camadas, Ports & Adapters, padronização de use cases, side-effects e separação Entity vs DTO.
+alwaysApply: true
+---
+
+# Clean Architecture
+
+> Frameworks são detalhes, não núcleo.
+> Domain deve ser testável sem infra.
+> Toda dependência externa entra via interface.
+
+## Regra de Dependência
+
+```
+Domain  <--  Application  <--  Infrastructure
+(mais interna)                 (mais externa)
+```
+
+- **Domain** não depende de NADA (sem framework, sem Pydantic em entidades, sem imports de infra).
+- **Application** depende apenas do Domain.
+- **Infrastructure** depende do Domain e Application.
+- **FastAPI é um plugin** — a aplicação funciona sem ele.
+
+## Imports proibidos
+
+```python
+# NUNCA na camada domain:
+from src.infrastructure import ...
+from src.application import ...
+from fastapi import ...
+from pydantic import ...
+
+# NUNCA na camada application:
+from src.infrastructure import ...
+from fastapi import ...
+```
+
+## Entidades de domínio — Python puro
+
+```python
+# Domain — CORRETO
+@dataclass
+class User:
+    id: Optional[str]
+    email: str
+    level: LevelEnum
+
+# Infrastructure/Application — Pydantic permitido
+class UserRequest(BaseModel):
+    email: EmailStr
+    level: str
+```
+
+## Ports & Adapters
+
+```python
+# Port (domínio)
+class IUserRepository(ABC):
+    @abstractmethod
+    async def find_by_email(self, email: str) -> Optional[User]: ...
+
+# Adapter (infra)
+class MongoDBUserRepository(IUserRepository):
+    async def find_by_email(self, email: str) -> Optional[User]:
+        doc = await self._collection.find_one({"email": email})
+        ...
+```
+
+## Use cases
+
+```python
+class CreateUserUseCase:
+    def __init__(self, repository: IUserRepository):
+        self.repository = repository  # interface, não implementação
+
+    async def execute(self, input_data: CreateUserInput) -> CreateUserOutput:
+        ...
+```
+
+## Regras adicionais
+
+- Use cases recebem **apenas interfaces** no `__init__`.
+- NUNCA instanciar MongoDB client, HTTP client ou serviço externo em use case.
+- Side-effects (DB, API, Slack, email) somente via interface injetada.
+- Um use case = uma operação de negócio.
+- `execute()` DEVE ser `async`.

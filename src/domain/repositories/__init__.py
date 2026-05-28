@@ -1,0 +1,1 @@
+"""Repositórios (ports) de Domain."""

@@ -1,0 +1,65 @@
+---
+description: Padrões de rotas FastAPI — estrutura de routers, autenticação, decorators de permissão e response models.
+globs:
+  - "**/routes/*.py"
+  - "**/entrypoint/**/*.py"
+alwaysApply: false
+---
+
+# Padrões FastAPI
+
+## Estrutura de rota
+
+```python
+from fastapi import APIRouter, HTTPException, Request, status, Depends
+
+router = APIRouter(prefix="/examples", tags=["examples"])
+
+
+@router.get("/{example_id}", response_model=ExampleResponse)
+async def get_example(example_id: str, request: Request):
+    """Busca uma entidade por ID."""
+    use_case = container.use_case.get_example_use_case()
+    result = await use_case.execute(GetExampleInput(id=example_id))
+    if result is None:
+        raise HTTPException(status_code=404, detail="Não encontrado")
+    return result
+```
+
+## Resolução de use cases
+
+Sempre resolver use cases a partir do container DI:
+
+```python
+from src.infrastructure.containers.containers import container
+
+use_case = container.use_case.nome_use_case()
+result = await use_case.execute(InputModel(...))
+```
+
+## Response models
+
+- Sempre especifique `response_model=` nos decorators de rota.
+- Use `status_code=` explícito para respostas não-200.
+
+## Tratamento de erros nas rotas
+
+```python
+try:
+    result = await use_case.execute(input_data)
+    return result
+except HTTPException:
+    raise
+except ApplicationException:
+    raise  # tratado pelo handler global
+except Exception as e:
+    logger.error("[CONTEXTO] Erro: %s", e, exc_info=True)
+    raise HTTPException(status_code=500, detail="Erro interno")
+```
+
+## Incluir router em main.py
+
+```python
+from src.infrastructure.entrypoint.http.routes.examples import router as examples_router
+app.include_router(examples_router)
+```

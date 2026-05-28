@@ -1,0 +1,43 @@
+---
+description: Observer de governança para rules e skills — valida consistência antes do commit.
+alwaysApply: true
+---
+
+# Observer — Validação automática de Rules/Skills
+
+## Objetivo
+
+Garantir consistência entre regras e skills antes de cada commit,
+bloqueando mudanças incompletas ou conflitantes no sistema de governança do agente.
+
+## Ativação
+
+O observer pode ser ativado por hook local em `.git/hooks/pre-commit`.
+
+Quando houver arquivos staged em:
+- `.cursor/rules/`
+- `.cursor/skills/`
+- `.cursor/manifest.yml`
+
+o hook executa validação dos arquivos e bloqueia o commit se detectar:
+
+- Rule ou skill sem registro no `manifest.yml`.
+- Conflitos de ownership por tópico.
+- Referências cruzadas quebradas.
+
+## Fluxo recomendado
+
+1. Edite a rule/skill em `.cursor/`.
+2. Atualize `.cursor/manifest.yml`.
+3. Rode validação manual se necessário.
+4. Commit.
+
+## Exceções
+
+Para casos excepcionais, o hook pode ser ignorado com:
+
+```bash
+git commit --no-verify -m "mensagem"
+```
+
+Use apenas quando estritamente necessário, com correção posterior imediata.

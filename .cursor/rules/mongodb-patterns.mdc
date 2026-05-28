@@ -1,0 +1,70 @@
+---
+description: Padrões de repositório MongoDB — Motor async, ObjectId, índices e padrões de acesso.
+globs: "**/persistence/**/*.py"
+alwaysApply: false
+---
+
+# Padrões MongoDB
+
+## Repository MongoDB
+
+```python
+from typing import List, Optional
+from bson import ObjectId
+from motor.motor_asyncio import AsyncIOMotorDatabase
+from src.domain.entities.example import ExampleEntity
+from src.domain.repositories.example_repository import IExampleRepository
+
+
+class MongoDBExampleRepository(IExampleRepository):
+    def __init__(self, db: AsyncIOMotorDatabase):
+        self._collection = db["examples"]
+
+    async def save(self, entity: ExampleEntity) -> str:
+        doc = {
+            "name": entity.name,
+            "active": entity.active,
+            "_created": entity.created_at,
+            "_updated": entity.updated_at,
+        }
+        result = await self._collection.insert_one(doc)
+        return str(result.inserted_id)
+
+    async def find_by_id(self, entity_id: str) -> Optional[ExampleEntity]:
+        doc = await self._collection.find_one({"_id": ObjectId(entity_id)})
+        if not doc:
+            return None
+        return self._to_entity(doc)
+
+    async def list_all(self, limit: int = 50, skip: int = 0) -> List[ExampleEntity]:
+        cursor = self._collection.find().skip(skip).limit(limit)
+        return [self._to_entity(doc) async for doc in cursor]
+
+    async def delete(self, entity_id: str) -> bool:
+        result = await self._collection.delete_one({"_id": ObjectId(entity_id)})
+        return result.deleted_count > 0
+
+    def _to_entity(self, doc: dict) -> ExampleEntity:
+        return ExampleEntity(
+            id=str(doc["_id"]),
+            name=doc["name"],
+            active=doc.get("active", True),
+            created_at=doc.get("_created"),
+            updated_at=doc.get("_updated"),
+        )
+```
+
+## Regras
+
+- `_id` sempre `ObjectId` — nunca string como `_id`.
+- Mapear doc → entidade no método `_to_entity` privado.
+- `_version` incrementado a cada update.
+- Definir índices no bootstrap (lifespan do app).
+- Tratar `ObjectId` inválido com `ValueError` → `ValidationException`.
+
+## Índices
+
+```python
+await db["examples"].create_index("name")
+await db["examples"].create_index([("active", 1), ("_created", -1)])
+```

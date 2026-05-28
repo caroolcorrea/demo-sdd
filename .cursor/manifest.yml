@@ -1,0 +1,150 @@
+version: "1.0"
+
+project:
+  name: demo-sdd
+  description: Projeto demonstração de Spec-Driven Design (SDD) com FastAPI e Clean Architecture
+
+rules:
+  - id: spec-driven-design
+    file: rules/spec-driven-design.mdc
+    owner: architecture
+    alwaysApply: true
+    topics: [sdd, workflow, specification, design]
+
+  - id: clean-architecture
+    file: rules/clean-architecture.mdc
+    owner: architecture
+    alwaysApply: true
+    topics: [architecture, layers, dependency, ports-adapters]
+
+  - id: project-overview
+    file: rules/project-overview.mdc
+    owner: architecture
+    alwaysApply: true
+    topics: [project, stack, structure, conventions]
+
+  - id: python-standards
+    file: rules/python-standards.mdc
+    owner: platform
+    globs: ["**/*.py"]
+    topics: [python, standards, types, formatting]
+
+  - id: domain-layer
+    file: rules/domain-layer.mdc
+    owner: architecture
+    globs: ["**/domain/**/*.py"]
+    topics: [domain, entities, enums, repositories]
+
+  - id: application-layer
+    file: rules/application-layer.mdc
+    owner: architecture
+    globs: ["**/application/**/*.py"]
+    topics: [application, use-cases, exceptions]
+
+  - id: fastapi-patterns
+    file: rules/fastapi-patterns.mdc
+    owner: platform
+    globs: ["**/routes/**/*.py", "**/entrypoint/**/*.py"]
+    topics: [fastapi, http, routes, middleware]
+
+  - id: testing
+    file: rules/testing.mdc
+    owner: qa
+    alwaysApply: true
+    topics: [testing, pytest, unit, integration, hypothesis]
+
+  - id: error-handling
+    file: rules/error-handling.mdc
+    owner: platform
+    alwaysApply: true
+    topics: [errors, exceptions, http-errors]
+
+  - id: security-auth
+    file: rules/security-auth.mdc
+    owner: security
+    alwaysApply: true
+    topics: [security, jwt, auth, cors]
+
+  - id: mongodb-patterns
+    file: rules/mongodb-patterns.mdc
+    owner: platform
+    globs: ["**/persistence/**/*.py", "**/repositories/**/*.py"]
+    topics: [mongodb, motor, persistence, objectid]
+
+  - id: infrastructure-layer
+    file: rules/infrastructure-layer.mdc
+    owner: architecture
+    globs: ["**/infrastructure/**/*.py"]
+    topics: [infrastructure, di, containers, dependency-injector]
+
+  - id: observer
+    file: rules/observer.mdc
+    owner: devex
+    alwaysApply: true
+    topics: [manifest, validation, observer, pre-commit]
+
+skills:
+  - id: spec-driven-design
+    file: skills/spec-driven-design/SKILL.md
+    owner: architecture
+    topics: [sdd, pipeline, workflow, orchestrator]
+
+  - id: specify-feature
+    file: skills/specify-feature/SKILL.md
+    owner: architecture
+    topics: [sdd, specify, spec, requirements]
+
+  - id: design-feature
+    file: skills/design-feature/SKILL.md
+    owner: architecture
+    topics: [sdd, design, sequence, decisions]
+
+  - id: tasks-breakdown
+    file: skills/tasks-breakdown/SKILL.md
+    owner: architecture
+    topics: [sdd, tasks, breakdown, planning]
+
+  - id: implement-validate
+    file: skills/implement-validate/SKILL.md
+    owner: architecture
+    topics: [sdd, implement, execute, validate]
+
+  - id: quick-mode
+    file: skills/quick-mode/SKILL.md
+    owner: devex
+    topics: [sdd, quick, small-changes, hotfix]
+
+  - id: create-use-case
+    file: skills/create-use-case/SKILL.md
+    owner: architecture
+    topics: [use-case, application, clean-architecture]
+
+  - id: create-route
+    file: skills/create-route/SKILL.md
+    owner: platform
+    topics: [fastapi, route, endpoint, http]
+
+  - id: create-repository
+    file: skills/create-repository/SKILL.md
+    owner: platform
+    topics: [repository, mongodb, persistence, port]
+
+  - id: create-test
+    file: skills/create-test/SKILL.md
+    owner: qa
+    topics: [testing, pytest, unit, integration, mocks]
+
+  - id: brownfield-mapping
+    file: skills/brownfield-mapping/SKILL.md
+    owner: architecture
+    topics: [codebase, docs, mapping, brownfield]
+
+  - id: state-management
+    file: skills/state-management/SKILL.md
+    owner: planning
+    topics: [state, decisions, blockers, lessons, todos]
+
+  - id: commit-push
+    file: skills/commit-push/SKILL.md
+    owner: devex
+    topics: [git, commit, push, conventional-commits]

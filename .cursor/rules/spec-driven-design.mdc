@@ -1,0 +1,103 @@
+---
+description: Constitution do Spec-Driven Design (SDD) — pipeline obrigatório (Specify -> Design -> Tasks -> Execute) com auto-sizing. Governa onde specs vivem e como features novas devem ser planejadas e implementadas.
+alwaysApply: true
+---
+
+# Spec-Driven Design — Constitution
+
+> Toda mudança relevante no projeto é governada por uma especificação versionada em git.
+> Decisão registrada: `D-001` em [`.specs/project/STATE.md`](../../.specs/project/STATE.md).
+
+---
+
+## Princípio fundamental
+
+> Spec compila para código. Quando spec e código divergem, a spec precisa ser atualizada no mesmo PR — código prevalece como fonte de verdade da execução.
+
+Prompts ad-hoc geram retrabalho. Specs versionadas geram código previsível e revisável.
+
+---
+
+## Pipeline obrigatório
+
+```text
+SPECIFY  -->  DESIGN  -->  TASKS  -->  EXECUTE
+required      optional*     optional*    required
+```
+
+Specify e Execute são **sempre** obrigatórios. Design e Tasks são pulados quando não agregam.
+
+---
+
+## Auto-sizing
+
+| Escopo  | Critério                                     | Specify        | Design   | Tasks    | Execute |
+|---------|----------------------------------------------|----------------|----------|----------|---------|
+| Small   | <= 3 arquivos, uma sentença                  | quick mode     | -        | -        | -       |
+| Medium  | Feature clara, < 10 tasks                    | brief          | inline   | implicit | sim     |
+| Large   | Multi-componente                             | full + IDs     | sim      | sim      | sim     |
+| Complex | Ambiguidade, domínio novo, integração nova   | full + discuss | research | parallel | UAT     |
+
+**Quando subir uma classe:** quando feature toca >= 3 camadas, introduz padrão novo, integra com API externa nova, ou tem trade-off arquitetural.
+
+---
+
+## Estrutura `.specs/`
+
+```text
+.specs/
+├── README.md
+├── project/
+│   ├── PROJECT.md
+│   ├── ROADMAP.md
+│   └── STATE.md
+├── codebase/
+│   ├── STACK.md, ARCHITECTURE.md, STRUCTURE.md
+│   ├── CONVENTIONS.md, HTTP_API.md, SECURITY.md
+│   ├── PERMISSIONS.md, AUDIT.md, PERSISTENCE.md
+│   ├── INTEGRATIONS.md, RUNTIME.md, TESTING.md, CONCERNS.md
+├── features/
+│   └── <slug>/
+│       ├── spec.md
+│       ├── context.md  (opcional)
+│       ├── design.md   (Large/Complex)
+│       └── tasks.md    (Large/Complex)
+└── quick/
+    └── NNN-<slug>/
+        ├── TASK.md
+        └── SUMMARY.md
+```
+
+---
+
+## Regras
+
+### R-1. Spec antes de código para mudança relevante
+
+Toda mudança que toca **>= 4 arquivos** OU **>= 2 camadas** OU **adiciona padrão novo** começa por `spec.md` em `.specs/features/<slug>/`.
+
+Exceção: bug fix simples (<= 3 arquivos) e config change usam **quick mode** (`.specs/quick/`).
+
+### R-2. Acceptance criteria executável
+
+Cada critério do spec deve ser **um comando ou test que passa/falha**:
+
+```markdown
+- `make unit` passa
+- `poetry run pytest tests/unit/path -v` passa
+- `curl http://localhost:8000/path` retorna 200 com `{...}`
+```
+
+Critérios subjetivos não são aceitos.
+
+### R-3. Constraints são obrigatórios
+
+Toda spec lista **o que o agente NÃO deve fazer**. Sem constraints, agente expande escopo.
+
+### R-4. Update do `codebase/` no mesmo PR
+
+Quando uma feature muda **contrato HTTP, schema MongoDB, env var ou padrão arquitetural**, atualizar o arquivo correspondente em `.specs/codebase/` no mesmo PR.
+
+### R-5. Decisões registradas em STATE.md
+
+Decisões técnicas com trade-off (D-NNN), blockers (B-NNN) e lessons (L-NNN) vivem em `.specs/project/STATE.md`.

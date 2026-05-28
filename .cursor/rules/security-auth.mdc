@@ -1,0 +1,68 @@
+---
+description: Padrões de segurança e autenticação — JWT, decorators de permissão e CORS.
+globs:
+  - "**/auth/**/*.py"
+  - "**/middleware/**/*.py"
+  - "**/security/**/*.py"
+alwaysApply: false
+---
+
+# Segurança e Autenticação
+
+## Fluxo
+
+```
+Cliente → Bearer JWT → AuthMiddleware → request.state.user → Rota
+```
+
+## JWT
+
+- Algoritmo: HS256
+- Secret: `settings.SECRET_KEY`
+- Decode: `jwt.decode(token, settings.SECRET_KEY, algorithms=["HS256"])`
+
+## AuthMiddleware
+
+```python
+class AuthMiddleware(BaseHTTPMiddleware):
+    async def dispatch(self, request: Request, call_next):
+        if request.url.path in PUBLIC_PATHS:
+            return await call_next(request)
+        token = request.headers.get("Authorization", "").removeprefix("Bearer ")
+        try:
+            payload = jwt.decode(token, settings.SECRET_KEY, algorithms=["HS256"])
+            request.state.user = payload
+        except jwt.InvalidTokenError:
+            return JSONResponse({"error": "Unauthorized"}, status_code=401)
+        return await call_next(request)
+```
+
+## Paths públicos
+
+- `GET /health`
+- `GET /docs`, `/openapi.json`, `/redoc`
+
+## CORS
+
+```python
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["https://meuapp.com"],  # produção: restringir
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+```
+
+## Headers de segurança
+
+```
+X-Content-Type-Options: nosniff
+X-Frame-Options: SAMEORIGIN
+```
+
+## Regras
+
+- NUNCA armazene segredos no código — usar env vars.
+- NUNCA logue tokens, JWT completo ou senhas.
+- SEMPRE valide JWT antes de qualquer operação protegida.
+- Use `Depends(get_current_user)` para endpoints autenticados.

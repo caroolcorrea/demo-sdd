@@ -1,0 +1,70 @@
+---
+description: Padrões de testes — pytest stack, Hypothesis, markers, mocks, Makefile/CI e anti-padrões.
+alwaysApply: true
+---
+
+# Padrões de Testes
+
+## Configuração
+
+- Runner: **pytest** + **pytest-asyncio** (`asyncio_mode = auto` em `pytest.ini`)
+- Paths: `pythonpath = ["src", "tests"]`, `testpaths = ["tests"]`
+- Timeout padrão: 30s
+- Coverage gate: **80%** em `make coverage`
+
+## Regra fundamental
+
+> **Um teste que passa mesmo quando o código está errado é pior do que nenhum teste.**
+
+Antes de commitar: comente o `return` principal — o teste **deve falhar**. Se não falhar, é falso positivo.
+
+## Estrutura
+
+```
+tests/
+├── conftest.py       # Fixtures globais, Hypothesis profiles
+├── unit/             # Lógica isolada — use cases, DTOs, mappers
+├── integration/      # Endpoints HTTP, repositórios
+└── smoke/            # Validação mínima pós-deploy
+```
+
+## Convenção de nomes
+
+```python
+def test_<ação>_<cenário>_<resultado_esperado>():
+    """Cenário: X. Expectativa: Y."""
+```
+
+## Anti-padrões — Nunca faça
+
+```python
+# ERRADO — over-mocking (testa o mock, não o código)
+use_case.execute = AsyncMock(return_value={"id": "x"})
+result = await use_case.execute(input_data)
+assert result["id"] == "x"  # sempre passa
+
+# CERTO — mock apenas dependências externas
+result = await use_case.execute(input_data)
+assert result.id is not None
+assert result.name == input_data.name
+```
+
+- **Over-mocking**: não mockar o método/classe sob teste.
+- **Assert só de chamada**: sempre verificar resultado observável.
+- **Testes duplicados**: usar `@pytest.mark.parametrize`.
+- **Setup excessivo**: arrange mínimo; assert específico.
+
+## O que mockar
+
+| Categoria      | Ação                                    |
+|----------------|-----------------------------------------|
+| MongoDB        | `AsyncMock` na collection              |
+| API externa    | `AsyncMock` no repository              |
+| Tempo          | `freezegun.freeze_time`                |
+| O próprio UC   | NUNCA                                   |
+
+## Hypothesis (property-based)
+
+- Marker: `@pytest.mark.property`
+- Usar em: funções puras, normalizers, mappers determinísticos.
+- Não usar em: use cases com mocks pesados, rotas HTTP.

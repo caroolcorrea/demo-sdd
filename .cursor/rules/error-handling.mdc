@@ -1,0 +1,69 @@
+---
+description: Padrões de tratamento de erros — hierarquia ApplicationException, ErrorResponseDTO padronizado e handlers globais.
+globs:
+  - "**/exceptions*.py"
+  - "**/main.py"
+alwaysApply: false
+---
+
+# Tratamento de Erros
+
+## Hierarquia de exceções
+
+```python
+class ApplicationException(Exception):
+    def __init__(self, message: str, code: str = "APPLICATION_ERROR", status_code: int = 400):
+        self.message = message
+        self.code = code
+        self.status_code = status_code
+        super().__init__(self.message)
+
+class NotFoundException(ApplicationException):
+    def __init__(self, resource: str, resource_id: str):
+        super().__init__(
+            message=f"{resource} '{resource_id}' não encontrado",
+            code=f"{resource.upper()}_NOT_FOUND",
+            status_code=404,
+        )
+
+class ValidationException(ApplicationException):
+    def __init__(self, message: str):
+        super().__init__(message=message, code="VALIDATION_ERROR", status_code=400)
+```
+
+## Formato de resposta de erro
+
+```json
+{
+  "success": false,
+  "error_code": "RESOURCE_NOT_FOUND",
+  "message": "Resource '123' não encontrado",
+  "details": null
+}
+```
+
+## Handlers globais (main.py)
+
+```python
+@app.exception_handler(ApplicationException)
+async def application_exception_handler(request, exc):
+    return JSONResponse(
+        status_code=exc.status_code,
+        content={"success": False, "error_code": exc.code, "message": exc.message},
+    )
+
+@app.exception_handler(Exception)
+async def generic_exception_handler(request, exc):
+    logger.error("[UNHANDLED] %s", exc, exc_info=True)
+    return JSONResponse(
+        status_code=500,
+        content={"success": False, "error_code": "INTERNAL_ERROR", "message": "Internal server error"},
+    )
+```
+
+## Regras
+
+- NUNCA exponha stack traces para clientes.
+- SEMPRE logue a exceção com `exc_info=True`.
+- Use classes de exceção específicas, não `ApplicationException` genérica.
+- Inclua contexto nas mensagens de erro (id, email, etc.).

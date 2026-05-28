@@ -1,0 +1,63 @@
+---
+description: Regras da camada Domain — entidades dataclass, enums, interfaces de repositório e proibição de dependências de framework.
+globs: "**/domain/**/*.py"
+alwaysApply: false
+---
+
+# Camada Domain
+
+## Entidades — Python puro
+
+Entidades devem ser `dataclass` ou classes Python puras. **Sem Pydantic, sem FastAPI.**
+
+```python
+from dataclasses import dataclass, field
+from datetime import datetime
+from typing import Optional
+
+@dataclass
+class ExampleEntity:
+    id: Optional[str]
+    name: str
+    active: bool = True
+    created_at: datetime = field(default_factory=datetime.utcnow)
+```
+
+## Enums
+
+```python
+from enum import IntEnum, StrEnum
+
+class StatusEnum(StrEnum):
+    ACTIVE = "active"
+    INACTIVE = "inactive"
+
+class LevelEnum(IntEnum):
+    OWNER = 1
+    MANAGER = 2
+    ANALYST = 3
+```
+
+## Interfaces de repositório (Ports)
+
+```python
+from abc import ABC, abstractmethod
+from typing import List, Optional
+
+class IExampleRepository(ABC):
+    @abstractmethod
+    async def save(self, entity: ExampleEntity) -> str: ...
+
+    @abstractmethod
+    async def find_by_id(self, entity_id: str) -> Optional[ExampleEntity]: ...
+
+    @abstractmethod
+    async def list_all(self, limit: int = 50, skip: int = 0) -> List[ExampleEntity]: ...
+```
+
+## Regras
+
+- Domain **nunca** importa de `infrastructure`, `application`, `fastapi` ou `pydantic`.
+- Novos contratos: `src/domain/repositories/<nome>_repository.py`.
+- Todos os métodos de repositório DEVEM ser `async`.
+- Use `Optional` para métodos que podem retornar None.

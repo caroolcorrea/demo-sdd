@@ -1,0 +1,72 @@
+---
+description: Visão geral do projeto demo-sdd — stack, estrutura de pastas, convenções de nomenclatura e fluxo principal da aplicação.
+alwaysApply: true
+---
+
+# Visão Geral do Projeto — demo-sdd
+
+## Stack
+
+- **Linguagem**: Python 3.12+
+- **Framework**: FastAPI 0.115+
+- **Banco de dados**: MongoDB (Motor async driver)
+- **Validação**: Pydantic v2
+- **DI**: dependency-injector (DeclarativeContainer)
+- **Gerenciador de pacotes**: Poetry
+- **Testes**: pytest + pytest-asyncio
+
+## Estrutura de diretórios
+
+```
+src/
+├── main.py                          # App FastAPI, lifespan, exception handlers
+├── settings.py                      # Configuração via variáveis de ambiente
+├── application/                     # Camada de Aplicação
+│   ├── dto/                         # Data Transfer Objects (Pydantic)
+│   ├── exceptions.py                # Exceções de negócio
+│   ├── mappers/                     # Mapeadores de domínio
+│   └── use_cases/                   # Use cases por domínio
+├── domain/                          # Camada de Domínio (puro, sem infra)
+│   ├── entities/                    # Dataclasses Python puro
+│   ├── enums/                       # Enums (IntEnum/StrEnum)
+│   └── repositories/                # Ports (interfaces ABC)
+└── infrastructure/                  # Camada de Infraestrutura
+    ├── containers/                  # Container DI
+    ├── entrypoint/http/             # Entrypoint HTTP
+    │   ├── routes/                  # Routers FastAPI
+    │   └── middleware/              # Middlewares HTTP
+    └── persistence/repositories/   # Implementações MongoDB
+tests/
+├── conftest.py
+├── unit/
+├── integration/
+└── smoke/
+.specs/                              # Spec-Driven Design
+```
+
+## Spec-Driven Design
+
+Toda mudança relevante segue **Specify → Design → Tasks → Execute**.
+Specs vivem em `.specs/` — ver [`.specs/README.md`](../../.specs/README.md).
+Orquestrador: skill [`spec-driven-design`](../skills/spec-driven-design/SKILL.md).
+
+## Fluxo principal
+
+```
+Rota (APIRouter) → Use Case (execute) → Repository (interface) → MongoDB
+```
+
+## Container DI
+
+```python
+use_case = container.use_case.nome_use_case()
+result = await use_case.execute(input_data)
+```
+
+## Convenções de nomenclatura
+
+- Arquivos: `snake_case.py`
+- Classes: `PascalCase`
+- Use cases: `{Acao}{Entidade}UseCase`
+- Ports: `I{Entidade}Repository`
+- Implementations: `MongoDB{Entidade}Repository`
