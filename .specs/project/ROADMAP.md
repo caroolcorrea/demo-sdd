@@ -25,7 +25,7 @@
 
 | Feature / refator | Owner       | Observação                            |
 |-------------------|-------------|---------------------------------------|
-| CRUD de exemplo   | Engenharia  | Demonstrar ciclo SDD completo         |
+| *(nenhum)*        | —           | Foco atual: consolidar práticas SDD   |
 
 ---
 
@@ -33,9 +33,9 @@
 
 ### Curto prazo
 
-1. **Feature CRUD completo** com spec, design, tasks e testes.
-2. **Autenticação JWT** básica.
-3. **Cobertura > 80%** em `make coverage`.
+1. **Consolidar documentação SDD** com exemplos e critérios executáveis.
+2. **Cobertura > 80%** em `make coverage`.
+3. **Autenticação JWT** básica.
 
 ### Médio prazo
 
