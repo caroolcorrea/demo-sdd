@@ -12,8 +12,6 @@
 | CONVENTIONS.md   | Padrões de código adotados                 |
 | HTTP_API.md      | Superfície HTTP (rotas, modelos, erros)    |
 | SECURITY.md      | Auth/JWT                                   |
-| PERMISSIONS.md   | RBAC/ABAC                                  |
-| AUDIT.md         | Auditoria de operações                     |
 | PERSISTENCE.md   | MongoDB, collections, índices              |
 | INTEGRATIONS.md  | APIs externas                              |
 | RUNTIME.md       | Deploy, env vars, Cloud Run                |

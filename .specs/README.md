@@ -48,8 +48,6 @@ Specify e Execute são **sempre obrigatórios**. Design e Tasks são pulados qua
 │   ├── PERSISTENCE.md
 │   ├── SECURITY.md
 │   ├── RUNTIME.md
-│   ├── AUDIT.md
-│   ├── PERMISSIONS.md
 │   ├── HTTP_API.md
 │   └── CONCERNS.md
 ├── features/           # Specs por feature (ciclo SDD)
