@@ -1,49 +1,52 @@
 # demo-sdd
 
-> Projeto demo de **Spec-Driven Design (SDD)** com Clean Architecture em Python/FastAPI.
-> Use este repositório como template ou referência para novos projetos.
+Projeto de referência para demonstrar **Spec-Driven Design (SDD)** em uma API Python/FastAPI com Clean Architecture.
 
----
+A ideia principal é simples: antes de mudar o código, a intenção da mudança fica registrada em uma spec versionada. Assim, o projeto mantém contexto, decisões e critérios de aceite junto do código.
 
-## Stack
-
-- **Python** 3.12+
-- **FastAPI** 0.115+
-- **MongoDB** (Motor async)
-- **Pydantic** v2
-- **dependency-injector** (DeclarativeContainer)
-- **pytest** + pytest-asyncio
-- **Poetry**
-
-## Estrutura SDD
-
-```
-.specs/
-├── project/     # Constitution: PROJECT.md, ROADMAP.md, STATE.md
-├── codebase/    # Brownfield mapping do estado atual
-├── features/    # Specs por feature (spec.md, design.md, tasks.md)
-└── quick/       # Mudanças pequenas (<= 3 arquivos)
-```
-
-## Início rápido
-
-```bash
-# Instalar dependências
-poetry install
-
-# Rodar testes
-make unit
-
-# Rodar servidor local
-make run
-```
-
-## Workflow SDD
+## Como este projeto funciona
 
 Toda mudança relevante segue o pipeline:
 
-```
-SPECIFY  -->  DESIGN  -->  TASKS  -->  EXECUTE
+```text
+SPECIFY -> DESIGN -> TASKS -> EXECUTE
 ```
 
-Detalhes em [`.specs/README.md`](.specs/README.md) e skill [`spec-driven-design`](.cursor/skills/spec-driven-design/SKILL.md).
+- **Specify**: define objetivo, requisitos, restrições e critérios de aceite.
+- **Design**: descreve a arquitetura quando a mudança exige decisão técnica.
+- **Tasks**: quebra features grandes em passos pequenos e verificáveis.
+- **Execute**: implementa a mudança e valida os critérios definidos.
+
+Mudanças pequenas usam **quick mode** em `.specs/quick/`, com um `TASK.md` antes da alteração e um `SUMMARY.md` depois.
+
+## Estrutura SDD
+
+```text
+.specs/
+├── project/      # Visão, roadmap e memória do projeto
+├── codebase/     # Mapa do estado atual do código
+├── features/     # Specs completas por feature
+└── quick/        # Mudanças pequenas e pontuais
+```
+
+## Stack
+
+- Python 3.12+
+- FastAPI
+- MongoDB com Motor async
+- Pydantic v2
+- dependency-injector
+- pytest + pytest-asyncio
+- Poetry
+
+## Comandos básicos
+
+```bash
+poetry install
+make unit
+make run
+```
+
+## Onde começar
+
+Leia primeiro `.specs/README.md` para entender o fluxo SDD. Depois consulte `.specs/project/PROJECT.md` para ver os princípios do projeto e `.specs/codebase/` para entender o estado atual da arquitetura.
